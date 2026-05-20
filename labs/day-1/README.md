@@ -70,7 +70,8 @@ Open the generated `tsconfig.json` and replace its contents with this trimmed ve
     "module": "commonjs",
     "strict": true,
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "verbatimModuleSyntax": false
   },
   "include": ["src/**/*.ts"]
 }
