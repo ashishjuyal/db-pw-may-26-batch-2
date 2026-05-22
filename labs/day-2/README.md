@@ -715,4 +715,4 @@ Your test must follow the same rules as the guided lab — role-based or testid-
 
 ---
 
-*Proceed to **Session 3 — Stability, Assertions & Page Object Model** once all acceptance criteria are met.*
+*Proceed to **Session 3 — Stability & Assertions ** once all acceptance criteria are met.*
