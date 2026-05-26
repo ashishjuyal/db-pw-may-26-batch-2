@@ -39,8 +39,10 @@ test("@smoke login, search for a product, and logout", async ({ page }) => {
   
   // Wait for the results to load (there is an async fetch — how do you know when it's done?)
   const loader = page.getByTestId("loading-spinner");
-  await expect(loader).toBeVisible();
-  await expect(loader).not.toBeVisible();
+  await loader.waitFor({ state: "visible" });
+  await loader.waitFor({ state: "hidden" });
+  // await expect(loader).toBeVisible();
+  // await expect(loader).not.toBeVisible();
 
   // Prove exactly 1 product card is visible
   await expect(page.getByTestId('product-card')).toHaveCount(1);
