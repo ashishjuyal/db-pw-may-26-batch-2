@@ -12,7 +12,7 @@ export class LoginPage extends BasePage {
     this.loginError = this.page.getByTestId("login-error");
   }
 
-  async login(email: string, password: string) {
+  async loginWith(email: string, password: string) {
     await this.navigate("/login");
     await this.userEmail.fill(email);
     await this.page.getByTestId("login-password").fill(password);
