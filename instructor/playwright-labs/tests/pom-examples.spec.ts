@@ -1,30 +1,18 @@
-import { test, expect } from "@playwright/test";
-import { LoginPage } from "./pages/login.page";
-import { ProductsPage } from "./pages/products.page";
-import { CartPage } from "./pages/cart.page";
-
+import { test, expect } from "./fixtures/test.fixtures";
 
 test.describe('Login Feature', () => {
-  let loginPage:LoginPage;
-
-  test.beforeEach(({page}) => {
-    loginPage = new LoginPage(page);
-  })
   
-  test("login with valid credentials", async ({ page }) => {
+  test("login with valid credentials", async ({ loginPage }) => {
     await loginPage.login("standard_user@example.com", "Password123!");  
     await loginPage.assertSuccessful();
   });
   
-  test("login with invalid credentials shows error", async ({ page }) => {
+  test("login with invalid credentials shows error", async ({ loginPage }) => {
     loginPage.login("wrong@example.com", "wrong@example.com");
     await loginPage.assertLoginError("Invalid email or password");
   });
 
-  test("add product to cart and verify cart count", async ({ page }) => {    
-    const productsPage = new ProductsPage(page);
-    const cartPage = new CartPage(page);
-
+  test("add product to cart and verify cart count", async ({ loginPage, productsPage, cartPage }) => {    
     await loginPage.login("standard_user@example.com", "Password123!");
     await productsPage.goto();
     await productsPage.search("Keyboard");
