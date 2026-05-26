@@ -15,7 +15,6 @@ Part A        → 7 focused examples — one concept each
   Example 4   → Download and upload
   Example 5   → Skip, fixme, and fail annotations
   Example 6   → test.describe and beforeEach — group tests and share setup
-  Example 7   → Playwright project configuration — projects, setup, teardown
 Lab           → Independent: combine all techniques without guidance
 ```
 
