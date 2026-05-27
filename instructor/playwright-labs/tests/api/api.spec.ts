@@ -2,11 +2,8 @@ import { expect, test } from "@playwright/test";
 
 
 test.skip('Example 1: Simple API interaction', async({ page }) => {
-
   const response = await page.goto('/');
-
   if (response == null) return;
-  
   console.log(await response.text());
   console.log(response.status());
 });
