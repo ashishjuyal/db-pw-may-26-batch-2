@@ -12,7 +12,7 @@ test.describe('Login Feature', () => {
     await loginPage.assertLoginError("Invalid email or password");
   });
 
-  test("add product to cart and verify cart count", async ({ loginPage, productsPage, cartPage }) => {    
+  test("add product to cart and verify cart count", async ({ loginPage, productsPage, cartPage, api }) => {    
     await loginPage.loginWith("standard_user@example.com", "Password123!");
     await productsPage.goto();
     await productsPage.search("Keyboard");

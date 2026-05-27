@@ -1,17 +1,6 @@
 import { test, expect, APIRequestContext, Page } from "@playwright/test";
 import { request } from "node:http";
 
-async function setAuth(request: APIRequestContext, page: Page) {
-  const token = await getToken(request, "standard_user@example.com", "Password123!" )
-
-  await page
-    .context()
-    .addCookies([
-      { name: "token", value: token, domain: "localhost", path: "/" },
-    ]);
-}
-
-
 test("Exercise 1: GET /api/products returns the product catalogue", async ({
   request,
 }) => {
@@ -64,15 +53,6 @@ test.describe('Exercise 3 container', () => {
   });
 })
 
-async function getToken(request: APIRequestContext, username: string, passwd: string) {
-  const loginRes = await request.post("/api/auth/login", {
-    data: { email: username, password: passwd },
-  });
-  expect(loginRes.status()).toBe(200);
-  const { token } = await loginRes.json();
-  return token;
-}
-
 test.describe("Exercise 4 scenario", () => {
   let productName: string;
   let product: { id: number };
@@ -103,6 +83,50 @@ test.describe("Exercise 4 scenario", () => {
 
 });
 
+
+test("Exercise 5: placing an order via UI creates an order record in the API", async ({
+  page,
+  request,
+}) => {
+  const loginRes = await request.post("/api/auth/login", {
+    data: { email: "standard_user@example.com", password: "Password123!" },
+  });
+  const { token } = await loginRes.json();
+  await page
+    .context()
+    .addCookies([
+      { name: "token", value: token, domain: "localhost", path: "/" },
+    ]);
+
+  // Add cart item via API — this is a precondition, not what we are testing
+  await request.post("/api/cart", {
+    headers: { Cookie: `token=${token}` },
+    data: { product_id: 1 },
+  });
+
+  await page.goto("/checkout");
+  await page.getByTestId("checkout-name").fill("Alex Johnson");
+  await page.getByTestId("checkout-address").fill("123 Test Street");
+  await page.getByTestId("checkout-city").fill("Sydney");
+  await page.getByTestId("checkout-postcode").fill("2000");
+  await page.getByTestId("checkout-card").fill("4242 4242 4242 4242");
+  await page.getByTestId("checkout-expiry").fill("12/28");
+  await page.getByTestId("checkout-cvv").fill("123");
+  await page.getByTestId("place-order-btn").click();
+
+  await expect(page.getByTestId("order-confirmation")).toBeVisible();
+  const orderId = await page.getByTestId("order-id").textContent();
+  const cleanId = orderId?.replace("#", "").trim();
+
+  const orderRes = await request.get(`/api/orders/${cleanId}`, {
+    headers: { Cookie: `token=${token}` },
+  });
+  expect(orderRes.status()).toBe(200);
+  const { order } = await orderRes.json();
+  expect(order.status).toBe("confirmed");
+  expect(order.items).toHaveLength(1);
+});
+
 async function createProduct(productName: string, request: APIRequestContext, adminToken: string, product: { id: number; }) {
   productName = `Lab-Product-${Date.now()}`;
   const createRes = await request.post("/api/products", {
@@ -114,5 +138,33 @@ async function createProduct(productName: string, request: APIRequestContext, ad
   const body = await createRes.json();
   product = body.product;
   return { productName, product };
+}
+
+
+async function setAuth(request: APIRequestContext, page: Page) {
+  const token = await getToken(
+    request,
+    "standard_user@example.com",
+    "Password123!",
+  );
+
+  await page
+    .context()
+    .addCookies([
+      { name: "token", value: token, domain: "localhost", path: "/" },
+    ]);
+}
+
+async function getToken(
+  request: APIRequestContext,
+  username: string,
+  passwd: string,
+) {
+  const loginRes = await request.post("/api/auth/login", {
+    data: { email: username, password: passwd },
+  });
+  expect(loginRes.status()).toBe(200);
+  const { token } = await loginRes.json();
+  return token;
 }
 
