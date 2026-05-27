@@ -2,11 +2,7 @@ import { test, expect, APIRequestContext, Page } from "@playwright/test";
 import { request } from "node:http";
 
 async function setAuth(request: APIRequestContext, page: Page) {
-  const response = await request.post("/api/auth/login", {
-    data: { email: "standard_user@example.com", password: "Password123!" },
-  });
-  expect(response.status()).toBe(200);
-  const { token } = await response.json();
+  const token = await getToken(request, "standard_user@example.com", "Password123!" )
 
   await page
     .context()
@@ -34,9 +30,9 @@ test("Exercise 1: GET /api/products returns the product catalogue", async ({
   expect(body).toHaveProperty("products");
   expect(body).toHaveProperty("count");
 
-  expect(electronics.length).toBe(4);
-  expect(body.products.length).toBe(12);
-  expect(body.count).toBe(12);
+  expect(electronics.length).toBe(5);
+  expect(body.products.length).toBe(13);
+  expect(body.count).toBe(13);
 });
 
 test("Exercise 2: product name in the API matches the UI", async ({
@@ -68,6 +64,14 @@ test.describe('Exercise 3 container', () => {
   });
 })
 
+async function getToken(request: APIRequestContext, username: string, passwd: string) {
+  const loginRes = await request.post("/api/auth/login", {
+    data: { email: username, password: passwd },
+  });
+  expect(loginRes.status()).toBe(200);
+  const { token } = await loginRes.json();
+  return token;
+}
 
 test.describe("Exercise 4 scenario", () => {
   let productName: string;
@@ -75,24 +79,8 @@ test.describe("Exercise 4 scenario", () => {
   let adminToken: string;
 
   test.beforeEach(async ({request, page}) => {
-    const loginRes = await request.post("/api/auth/login", {
-      data: { email: "admin@example.com", password: "Admin123!" },
-    });
-    expect(loginRes.status()).toBe(200);
-    const { token } = await loginRes.json();
-    adminToken = token;
-
-      // Create a unique product
-    productName = `Lab-Product-${Date.now()}`;
-    const createRes = await request.post("/api/products", {
-      headers: { Authorization: `Bearer ${adminToken}` },
-      data: { name: productName, description: "Created by test", price: 42.99, category: "Electronics", stock: 5, },
-    });
-
-    expect(createRes.status()).toBe(201);
-    const body = await createRes.json();
-    product = body.product;
-
+    adminToken = await getToken(request, "admin@example.com", "Admin123!");
+    ({ productName, product } = await createProduct(productName, request, adminToken, product));
     await setAuth(request, page);
   });
 
@@ -115,5 +103,16 @@ test.describe("Exercise 4 scenario", () => {
 
 });
 
+async function createProduct(productName: string, request: APIRequestContext, adminToken: string, product: { id: number; }) {
+  productName = `Lab-Product-${Date.now()}`;
+  const createRes = await request.post("/api/products", {
+    headers: { Authorization: `Bearer ${adminToken}` },
+    data: { name: productName, description: "Created by test", price: 42.99, category: "Electronics", stock: 5, },
+  });
 
+  expect(createRes.status()).toBe(201);
+  const body = await createRes.json();
+  product = body.product;
+  return { productName, product };
+}
 
