@@ -1,0 +1,9 @@
+{
+  "default": {
+    "paths": ["tests/features/**/*.feature"],
+    "require": ["tests/steps/**/*.ts", "tests/world/**/*.ts"],
+    "requireModule": ["ts-node/register"],
+    "parallel": 4,
+    "format": ["progress-bar", "html:output/cucumber-report.html"]
+  }
+}
