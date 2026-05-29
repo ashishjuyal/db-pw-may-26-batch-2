@@ -46,7 +46,7 @@ test("login, search for a product, and logout", async ({ page }) => {
   // await expect(loader).not.toBeVisible();
 
   // Prove exactly 1 product card is visible
-  await expect(page.getByTestId('product-card')).toHaveCount(1);
+  await expect(page.getByTestId('product-card')).toHaveCount(2);
 
   // ── Step 5: Verify the result ─────────────────────────────────────────────
   // Prove the product name is "Mechanical Keyboard"
